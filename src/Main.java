@@ -4,7 +4,7 @@ import java.util.StringTokenizer;
 
 public class Main {
     public static void main(String[] args) {
-        //Converter op = new Converter(args[0].strip());
+        //Converter op = new Converter(args[0].toLowerCase());
     }
 }
 
@@ -32,9 +32,8 @@ class Converter {
      * @param instruction
      */
     public Converter(String instruction){
-        this.instruction = instruction;
+        this.instruction = instruction.toLowerCase();
         load_mnemonic();
-        System.out.println(parseInstruction()); // <- this is where the print of the list happens (for testing)
     }
 
     /**
@@ -81,15 +80,14 @@ class Converter {
      * @delimiter COMMA, SPACE
      * @return Tokenized ArrayList<String>
      */
-    private ArrayList<String> parseInstruction(){
+    public ArrayList<String> parseInstruction(){
         StringTokenizer tokenizer = new StringTokenizer(instruction, " ,");
         ArrayList<String> instructionList = new ArrayList<>();
         while(tokenizer.hasMoreTokens()){
             String token = tokenizer.nextToken();
-            if(token.contains("#")){
-                int cutOff = token.indexOf('#');
-                token = token.substring(0, cutOff);
-                if(!token.isEmpty()){instructionList.add(token);}
+            if(token.contains("#")){ //checks to see if '#' is attached to one of the valid instruction pieces, '#' = start of comment
+                token = token.substring(0, token.indexOf('#')); //detaches '#' from valid instruction piece
+                if(!token.isEmpty()){instructionList.add(token);} //add only the valid instruction piece, if token was only '#' -> token would be EMPTY
                 break;
             }
             instructionList.add(token);
