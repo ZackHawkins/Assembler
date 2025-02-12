@@ -8,7 +8,7 @@ public class ConverterTest {
 
     @Test
     public void returnProperList01(){
-        String instruction = "     addiu        $s1,               $s2, 0x001f      ";
+        String instruction = "add#hello";
         Converter testList = new Converter(instruction);
         System.out.println(testList.get_instruction_array());
         System.out.println(testList.get_format_type());
