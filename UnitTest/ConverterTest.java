@@ -8,10 +8,9 @@ public class ConverterTest {
 
     @Test
     public void returnProperList01(){
-        String instruction = "add#hello";
+        String instruction = "add $ra $s1 $t1";
         Converter testList = new Converter(instruction);
-        System.out.println(testList.get_instruction_array());
-        System.out.println(testList.get_format_type());
+        testList.instruction_to_hex();
     }
 
 }

@@ -154,11 +154,54 @@ class Converter {
     }
 
     private String format_r_type_converter() {
+        switch (instructionArray.get(0)){
+            case "syscall":
+                break;
+            default:
+                this.op_code = mnemonic.get(instructionArray.get(0));
+                System.out.println(get_register_value(instructionArray.get(1)));
+        }
+
         return null;
     }
 
     private String format_j_type_converter(){
         return null;
+    }
+
+    private int get_register_value(String reg){
+        if(!reg.contains("$")){throw new IllegalArgumentException("Passed in value must be register '$...'\n");}
+        int regValue = 0;
+        switch(reg){
+            case "$zero": return 0;
+            case "$at": return 1;
+            case "$gp": return 28;
+            case "$sp": return 29;
+            case "$fp": return 30;
+            case "$ra": return 31;
+            default:
+                String loc = reg.substring(0,2);
+                int offSet = Integer.parseInt(reg.substring(2));
+                switch(loc){
+                    case "$v":
+                        regValue = 2 + offSet;
+                        break;
+                    case "$a":
+                        regValue = 4 + offSet;
+                        break;
+                    case "$t":
+                        if(offSet < 8){regValue = 8 + offSet;}
+                        else{regValue = 24 + (offSet - 8);}
+                        break;
+                    case "$s":
+                        regValue = 16 + offSet;
+                        break;
+                    case "$k":
+                        regValue = 26 + offSet;
+                        break;
+                }
+        }
+        return regValue;
     }
 
 }
