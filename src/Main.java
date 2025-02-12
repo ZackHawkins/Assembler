@@ -12,7 +12,6 @@ class Converter {
 
     private final HashMap<String, Integer> mnemonic = new HashMap<>(); //hashmap for instruction opcode and corresponding binary value (6-Bit)
     private final HashMap<String, Integer> function = new HashMap<>(); //hashmap for function binary value (6-Bit) for R-Type
-
     private int
             /*operation instruction*/                   op_code,
             /*first operand*/                           rs,
@@ -22,11 +21,9 @@ class Converter {
             /*function code (R-type)*/                  funct,
             /*constant (I-type)*/                       constant,
             /*address (I-type)*/                        address;
-
     private final String format; //R-type, I-type, or J-type
-
     private final String instruction; //instruction from the command line
-    private final ArrayList<String> instructionArray; //passed in instruction parsed into an array
+    private ArrayList<String> instructionArray; //passed in instruction parsed into an array
 
     /**
      * specifying constructor sets the instruction variable from what was passed
@@ -35,8 +32,8 @@ class Converter {
      */
     public Converter(String instruction){
         this.instruction = instruction.toLowerCase();
-        this.instructionArray = parseInstruction();
-        load_mnemonic(); //calls load_function inside of load_mnemonic
+        parse_instruction();//builds arraylist with content from instruction
+        load_mnemonic(); //loads both hashmaps
         this.format = format_type();
     }
 
@@ -83,23 +80,20 @@ class Converter {
      * a list. Returns tokenized list once the end of the instruction string
      * is reached or when the comment character '#' is reached
      * @delimiter COMMA, SPACE
-     * @return Tokenized ArrayList<String>
      */
-    private ArrayList<String> parseInstruction(){
+    private void parse_instruction(){
         StringTokenizer tokenizer = new StringTokenizer(instruction, " ,");
-        ArrayList<String> instructionList = new ArrayList<>();
         while(tokenizer.hasMoreTokens()){
             String token = tokenizer.nextToken();
             if(token.contains("#")){ //checks to see if '#' is attached to one of the valid instruction pieces, '#' = start of comment
                 token = token.substring(0, token.indexOf('#')); //detaches '#' from valid instruction piece
-                if(!token.isEmpty()){instructionList.add(token);} //add only the valid instruction piece, if token was only '#' -> token would be EMPTY
+                if(!token.isEmpty()){instructionArray.add(token);} //add only the valid instruction piece, if token was only '#' -> token would be EMPTY
                 break;
             }
-            instructionList.add(token);
+            instructionArray.add(token);
         }
-        int lastElement = instructionList.size() -1; //last element in arrayList
-        if(instructionList.get(lastElement).contains("0x")){instructionList.set(lastElement, hex_to_decimal(instructionList.get(lastElement).substring(2)));} //2 is the offset since it is in hexadecimal '0x..'
-        return instructionList;
+        int lastElement = instructionArray.size() -1; //last element in arrayList
+        if(instructionArray.get(lastElement).contains("0x")){instructionArray.set(lastElement, hex_to_decimal(instructionArray.get(lastElement).substring(2)));} //2 is the offset since it is in hexadecimal '0x..'
     }
 
     /**
@@ -115,12 +109,66 @@ class Converter {
      */
     private String format_type(){
         if(instructionArray.get(0).equals("j")){return "J-type";}
+        else if(instructionArray.get(0).equals("syscall")){return "syscall";}
+        else if(instructionArray.get(0).equals("lw")){return "lw";} //special I-type
+        else if(instructionArray.get(0).equals("sw")){return "sw";} //special I-type
+        else if(instructionArray.get(0).equals("lui")){return "lui";}//special I-type
         else if(function.containsKey(instructionArray.get(0))){return "R-type";}
         return "I-type";
     }
 
+    /**
+     * returns the format type for the passed in assembly instruction
+     * @return format type
+     */
     public String get_format_type(){return this.format;}
+
+    /**
+     * returns the arraylist that contains the contents of the passed in assembly
+     * instruction. Each index of the array holds a single piece of passed in assembly instruction
+     * @return arraylist containing the parts to the passed in assembly instruction
+     */
     public ArrayList<String> get_instruction_array(){return this.instructionArray;}
 
+    public String instruction_to_hex(){
+        return switch (format) {
+            case "R-type" -> format_r_type_converter();
+            case "I-type" -> format_i_type_converter();
+            case "J-type" -> format_j_type_converter();
+            case "syscall" -> format_syscall_type_converter();
+            case "lw" -> format_lw_type_converter();
+            case "sw" -> format_sw_type_converter();
+            case "lui" -> format_lui_type_converter();
+            default -> null;
+        };
+    }
+
+    private String format_lui_type_converter() {
+        return null;
+    }
+
+    private String format_sw_type_converter() {
+        return null;
+    }
+
+    private String format_lw_type_converter() {
+        return null;
+    }
+
+    private String format_syscall_type_converter() {
+        return null;
+    }
+
+    private String format_r_type_converter(){
+        return null;
+    }
+
+    private String format_i_type_converter(){
+        return null;
+    }
+
+    private String format_j_type_converter(){
+        return null;
+    }
 
 }
