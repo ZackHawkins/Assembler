@@ -4,7 +4,7 @@ import java.util.StringTokenizer;
 
 public class Main {
     public static void main(String[] args) {
-        //Converter op = new Converter(args[0].toLowerCase());
+        //Converter op = new Converter(args[0]);
     }
 }
 
@@ -21,19 +21,23 @@ class Converter {
             /*shift amount (R-type)*/                   shamt,
             /*function code (R-type)*/                  funct,
             /*constant (I-type)*/                       constant,
-            /*address (I-type)*/                        address,
-            /*classifying instruction I=0, R=1, J=2*/   format;
+            /*address (I-type)*/                        address;
+
+    private final String format; //R-type, I-type, or J-type
 
     private final String instruction; //instruction from the command line
+    private final ArrayList<String> instructionArray; //passed in instruction parsed into an array
 
     /**
      * specifying constructor sets the instruction variable from what was passed
      * in as a string
-     * @param instruction
+     * @param instruction String
      */
     public Converter(String instruction){
         this.instruction = instruction.toLowerCase();
-        load_mnemonic();
+        this.instructionArray = parseInstruction();
+        load_mnemonic(); //calls load_function inside of load_mnemonic
+        this.format = format_type();
     }
 
     /**
@@ -63,7 +67,7 @@ class Converter {
 
     /**
      * loading the function hashmap with the func of the
-     * associated instruction
+     * associated instruction (R-type)
      */
     private void load_function(){
         function.put("add", 32);
@@ -71,6 +75,7 @@ class Converter {
         function.put("or", 37);
         function.put("slt", 42);
         function.put("sub", 34);
+        function.put("syscall", 12);
     }
 
     /**
@@ -80,7 +85,7 @@ class Converter {
      * @delimiter COMMA, SPACE
      * @return Tokenized ArrayList<String>
      */
-    public ArrayList<String> parseInstruction(){
+    private ArrayList<String> parseInstruction(){
         StringTokenizer tokenizer = new StringTokenizer(instruction, " ,");
         ArrayList<String> instructionList = new ArrayList<>();
         while(tokenizer.hasMoreTokens()){
@@ -92,6 +97,30 @@ class Converter {
             }
             instructionList.add(token);
         }
+        int lastElement = instructionList.size() -1; //last element in arrayList
+        if(instructionList.get(lastElement).contains("0x")){instructionList.set(lastElement, hex_to_decimal(instructionList.get(lastElement).substring(2)));} //2 is the offset since it is in hexadecimal '0x..'
         return instructionList;
     }
+
+    /**
+     * returns the decimal value of a hexadecimal as a String
+     * @param hex String
+     * @return hexadecimal converted into decimal notation and returned as a String
+     */
+    private String hex_to_decimal(String hex){return String.valueOf(Integer.parseInt(hex, 16));}//base 16
+
+    /**
+     * setFormat determines what type of instruction is being called upon.
+     * It could be I-type, R-type, J-type or syscall
+     */
+    private String format_type(){
+        if(instructionArray.get(0).equals("j")){return "J-type";}
+        else if(function.containsKey(instructionArray.get(0))){return "R-type";}
+        return "I-type";
+    }
+
+    public String get_format_type(){return this.format;}
+    public ArrayList<String> get_instruction_array(){return this.instructionArray;}
+
+
 }
