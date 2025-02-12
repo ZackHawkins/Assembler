@@ -12,18 +12,50 @@ class Converter {
 
     private final HashMap<String, Integer> mnemonic = new HashMap<>(); //hashmap for instruction opcode and corresponding binary value (6-Bit)
     private final HashMap<String, Integer> function = new HashMap<>(); //hashmap for function binary value (6-Bit) for R-Type
-    private int
-            /*operation instruction*/                   op_code,
-            /*first operand*/                           rs,
-            /*second operand*/                          rt,
-            /*register destination (R-type)*/           rd,
-            /*shift amount (R-type)*/                   shamt,
-            /*function code (R-type)*/                  funct,
-            /*constant (I-type)*/                       constant,
-            /*address (I-type)*/                        address;
-    private final String format; //R-type, I-type, or J-type
-    private final String instruction; //instruction from the command line
     private final ArrayList<String> instructionArray; //passed in instruction parsed into an array
+    private final String instruction; //instruction from the command line
+
+//------------------------------------------------------ Public Method Calls ------------------------------------------------------//
+
+    /**
+     * returns assembly instruction as a String in hexadecimal notation
+     * @return String
+     */
+    public String instruction_to_hex(){
+        return switch (get_format_type()) {
+            case "R-type" -> format_r_type_converter();
+            case "I-type" -> format_i_type_converter();
+            case "J-type" -> format_j_type_converter();
+            default -> null;
+        };
+    }
+
+    /**
+     * determines what type of instruction is being called upon.
+     * It could be I-type, R-type, J-type or syscall
+     */
+    public String get_format_type(){
+        try {
+            if (instructionArray.get(0).equals("j")) {
+                return "J-type";
+            } else if (function.containsKey(instructionArray.get(0))) {
+                return "R-type";
+            }
+            return "I-type";
+        } catch (IndexOutOfBoundsException iobe) {
+            System.out.println(iobe.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * returns the arraylist that contains the contents of the passed in assembly
+     * instruction. Each index of the array holds a single piece of passed in assembly instruction
+     * @return arraylist containing the parts to the passed in assembly instruction
+     */
+    public ArrayList<String> get_instruction_array(){return this.instructionArray;}
+
+//------------------------------------------------------ Environment Setup ------------------------------------------------------//
 
     /**
      * specifying constructor sets the instruction variable from what was passed
@@ -34,7 +66,6 @@ class Converter {
         load_mnemonic(); //loads both hashmaps
         this.instruction = instruction.toLowerCase();
         this.instructionArray = parse_instruction();
-        this.format = format_type();
     }
 
     /**
@@ -102,6 +133,8 @@ class Converter {
         return temp;
     }
 
+//------------------------------------------------------ Converters ------------------------------------------------------//
+
     /**
      * returns the decimal value of a hexadecimal as a String
      * @param hex String
@@ -109,56 +142,78 @@ class Converter {
      */
     private String hex_to_decimal(String hex){return String.valueOf(Integer.parseInt(hex, 16));}//base 16
 
-    /**
-     * setFormat determines what type of instruction is being called upon.
-     * It could be I-type, R-type, J-type or syscall
-     */
-    private String format_type(){
-        try {
-            if (instructionArray.get(0).equals("j")) {
-                return "J-type";
-            } else if (function.containsKey(instructionArray.get(0))) {
-                return "R-type";
-            }
-            return "I-type";
-        } catch (IndexOutOfBoundsException iobe) {
-            System.out.println(iobe.getMessage());
-        }
-        return null;
-    }
-
-    /**
-     * returns the format type for the passed in assembly instruction
-     * @return format type
-     */
-    public String get_format_type(){return this.format;}
-
-    /**
-     * returns the arraylist that contains the contents of the passed in assembly
-     * instruction. Each index of the array holds a single piece of passed in assembly instruction
-     * @return arraylist containing the parts to the passed in assembly instruction
-     */
-    public ArrayList<String> get_instruction_array(){return this.instructionArray;}
-
-    public String instruction_to_hex(){
-        return switch (format) {
-            case "R-type" -> format_r_type_converter();
-            case "I-type" -> format_i_type_converter();
-            case "J-type" -> format_j_type_converter();
-            default -> null;
-        };
-    }
-
     private String format_i_type_converter() {
         return null;
     }
 
+    /**
+     * converts the R-type assembly instruction into hexadecimal notation
+     * @return String
+     */
     private String format_r_type_converter() {
-        return null;
+        int rformat = 0;
+        if (instructionArray.get(0).equals("syscall")) {
+            rformat |= function.get(instructionArray.get(0));
+            rformat |= (mnemonic.get(instructionArray.get(0)) << 6);
+        } else {
+            int op_code = mnemonic.get(instructionArray.get(0));
+            int rd = get_register_value(instructionArray.get(1));
+            int rs = get_register_value(instructionArray.get(2));
+            int rt = get_register_value(instructionArray.get(3));
+            int shamt = 0;
+            int funct = function.get(instructionArray.get(0));
+            rformat |= (funct);
+            rformat |= (shamt << 6); //always 0
+            rformat |= (rd << 11);
+            rformat |= (rt << 16);
+            rformat |= (rs << 21);
+            rformat |= (op_code << 26);
+        }
+        return String.format("%08x", rformat);
     }
 
     private String format_j_type_converter(){
         return null;
+    }
+
+    /**
+     * returns the corresponding integer value of the passed in assembly
+     * register name
+     * @param reg String - assembly register name
+     * @return int
+     */
+    private int get_register_value(String reg){
+        if(!reg.contains("$")){throw new IllegalArgumentException("Passed in value must be register '$...'\n");}
+        int regValue = 0;
+        switch(reg){
+            case "$zero": return 0;
+            case "$at": return 1;
+            case "$gp": return 28;
+            case "$sp": return 29;
+            case "$fp": return 30;
+            case "$ra": return 31;
+            default:
+                int offSet = Integer.parseInt(reg.substring(2));
+                switch(reg.substring(0,2)){
+                    case "$v":
+                        regValue = 2 + offSet;
+                        break;
+                    case "$a":
+                        regValue = 4 + offSet;
+                        break;
+                    case "$t":
+                        if(offSet < 8){regValue = 8 + offSet;}
+                        else{regValue = 24 + (offSet - 8);}
+                        break;
+                    case "$s":
+                        regValue = 16 + offSet;
+                        break;
+                    case "$k":
+                        regValue = 26 + offSet;
+                        break;
+                }
+        }
+        return regValue;
     }
 
 }
