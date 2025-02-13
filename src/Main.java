@@ -4,7 +4,8 @@ import java.util.StringTokenizer;
 
 public class Main {
     public static void main(String[] args) {
-        //Converter op = new Converter(args[0]);
+        Converter op = new Converter(args[0]);
+        System.out.println(op.instruction_to_hex());
     }
 }
 
@@ -126,7 +127,7 @@ class Converter {
         }
         try {
             int lastElement = temp.size() - 1; //last element in arrayList
-            if (temp.get(lastElement).contains("0x")) {temp.set(lastElement, hex_to_decimal(temp.get(lastElement).substring(2)));} //2 is the offset since it is in hexadecimal '0x..'
+            if (temp.get(lastElement).contains("0x")) {temp.set(lastElement, hex_to_decimal(temp.get(lastElement).substring(2)));} //Converts last instruction value to integer if it is a hexadecimal, 2 is the offset since it is in hexadecimal '0x..'
         } catch (IndexOutOfBoundsException ioube){
             System.out.println(ioube.getMessage());
         }
@@ -172,8 +173,15 @@ class Converter {
         return String.format("%08x", rformat);
     }
 
+    /**
+     * converts the J-type assembly instruction into hexadecimal notation
+     * @return String
+     */
     private String format_j_type_converter(){
-        return null;
+        int jformat = 0;
+        jformat |= (Integer.parseInt(instructionArray.get(1)));
+        jformat |= (mnemonic.get(instructionArray.get(0)) << 26);
+        return String.format("%08x", jformat);
     }
 
     /**
