@@ -1,12 +1,10 @@
 import org.junit.Test;
-
-import java.util.ArrayList;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ConverterTest {
 
 //------------------------------------------------------ R-Type ------------------------------------------------------//
+
     @Test
     public void syscall(){
         String instruction = "syscall";
@@ -55,6 +53,45 @@ public class ConverterTest {
         System.out.println(testList.instruction_to_hex());
     }
 
-//------------------------------------------------------    ------------------------------------------------------//
+//------------------------------------------------------ J-Type ------------------------------------------------------//
 
+    @Test
+    public void j1(){
+        String instruction = "j 0x84";
+        Converter testList = new Converter(instruction);
+        assertEquals("08000084", testList.instruction_to_hex());
+        System.out.println(testList.instruction_to_hex());
+    }
+
+    @Test
+    public void j2(){
+        String instruction = "j 0xa5# Comment";
+        Converter testList = new Converter(instruction);
+        assertEquals("080000a5", testList.instruction_to_hex());
+        System.out.println(testList.instruction_to_hex());
+    }
+
+    @Test
+    public void j3(){
+        String instruction = "j 0x4d";
+        Converter testList = new Converter(instruction);
+        assertEquals("0800004d", testList.instruction_to_hex());
+        System.out.println(testList.instruction_to_hex());
+    }
+
+    @Test
+    public void j4(){
+        String instruction = "j 0x48# Comment";
+        Converter testList = new Converter(instruction);
+        assertEquals("08000048", testList.instruction_to_hex());
+        System.out.println(testList.instruction_to_hex());
+    }
+
+    @Test
+    public void j5(){
+        String instruction = "j 0x6f# Comment";
+        Converter testList = new Converter(instruction);
+        assertEquals("0800006f", testList.instruction_to_hex());
+        System.out.println(testList.instruction_to_hex());
+    }
 }
