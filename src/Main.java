@@ -150,7 +150,36 @@ class Converter {
     }
 
     private String format_i_type_converter() {
-        return null;
+        int opCode = mnemonic.get(instructionArray.get(0));
+        int rs = Integer.parseInt((instructionArray.get(1)));
+        int rt = Integer.parseInt((instructionArray.get(2)));
+        int immediate = Integer.parseInt((instructionArray.get(3)));
+
+        if(immediate < 0) {
+            immediate = twosComplement(immediate, 16);
+        }
+
+        if(opCode == 15) {
+            rs = 0;
+        }
+
+        int instruction = 0;
+
+        instruction = instruction | (opCode << 26);
+        instruction = instruction | (rs << 21);
+        instruction = instruction | (rt << 16);
+        instruction = instruction | (immediate);
+
+        String hexInstruction = String.format("%08x", instruction).replace(' ', '0');
+
+        return hexInstruction;
+    }
+
+    private int twosComplement(int value, int bitwidth) {
+        if(value >= 0) {
+            return value;
+        }
+        return (1 << bitwidth);
     }
 
     private String format_r_type_converter() {
