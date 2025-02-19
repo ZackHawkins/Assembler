@@ -2,7 +2,7 @@ import org.junit.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
+
 
 public class ConverterTest {
 
@@ -10,7 +10,7 @@ public class ConverterTest {
     public void test_file() {
         try (BufferedReader reader = new BufferedReader(new FileReader("test_instructions.txt")))
         {
-            int fileLine = 0;
+            int fileLine = 1;
             String line;
             while((line = reader.readLine()) != null){
                 String instruction = line.substring(line.indexOf(" "));
