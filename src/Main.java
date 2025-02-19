@@ -49,13 +49,6 @@ class Converter {
         return null;
     }
 
-    /**
-     * returns the arraylist that contains the contents of the passed in assembly
-     * instruction. Each index of the array holds a single piece of passed in assembly instruction
-     * @return arraylist containing the parts to the passed in assembly instruction
-     */
-    public ArrayList<String> get_instruction_array(){return this.instructionArray;}
-
 //------------------------------------------------------ Environment Setup ------------------------------------------------------//
 
     /**
@@ -77,19 +70,19 @@ class Converter {
      */
     private void load_mnemonic(){
         mnemonic.put("add", 0);
-        mnemonic.put("addiu", 9); //rt rs immediate
+        mnemonic.put("addiu", 9);
         mnemonic.put("and", 0);
-        mnemonic.put("andi", 12); //rt rs immediate
-        mnemonic.put("beq", 4); //rs rt offset
-        mnemonic.put("bne", 5); //rs rt offset
+        mnemonic.put("andi", 12);
+        mnemonic.put("beq", 4);
+        mnemonic.put("bne", 5);
         mnemonic.put("j", 2);
-        mnemonic.put("lui", 15); //rt offset
-        mnemonic.put("lw", 35); //rt offset(base)
+        mnemonic.put("lui", 15);
+        mnemonic.put("lw", 35);
         mnemonic.put("or", 0);
-        mnemonic.put("ori", 13); //rt rs
+        mnemonic.put("ori", 13);
         mnemonic.put("slt", 0);
         mnemonic.put("sub", 0);
-        mnemonic.put("sw", 43); //rt offset(base)
+        mnemonic.put("sw", 43);
         mnemonic.put("syscall", 0);
         load_function();
     }
@@ -143,17 +136,27 @@ class Converter {
      */
     private String hex_to_decimal(String hex){return String.valueOf(Integer.parseInt(hex, 16));}//base 16
 
+    /**
+     * helper method to for format_i_type_converter, this method will return a specific string
+     * depending on opcode. That string is used in format_i_type_converter to determine what order
+     * our variables need to check the array
+     * @param op opcode string type
+     * @return coded string
+     */
     private String rs_rt_order(String op){
-       String result = "";
         return switch (op) {
             case "addiu", "andi", "ori" -> "rt_rs";
             case "beq", "bne" -> "rs_rt";
             case "lui" -> "lui";
             case "lw", "sw" -> "rt off(base)";
-            default -> null;
+            default -> "";
         };
     }
 
+    /**
+     * converts I-type assembly instruction into hexadecimal notation
+     * @return String of hexadecimal
+     */
     private String format_i_type_converter() {
         int instruction = 0;
         int opCode = 0, rt = 0, rs = 0, immediate = 0;

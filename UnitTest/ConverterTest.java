@@ -2,7 +2,7 @@ import org.junit.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
+
 
 public class ConverterTest {
 
@@ -16,8 +16,7 @@ public class ConverterTest {
                 String instruction = line.substring(line.indexOf(" "));
                 String answer = line.substring(0, line.indexOf(" "));
                 Converter test = new Converter(instruction);
-                String testAnswer = test.instruction_to_hex();
-                assertEquals(answer, testAnswer);
+                assertEquals(answer, test.instruction_to_hex());
                 System.out.println("Line " + fileLine++ + ": "+ answer + " Passed");
             }
         } catch (Exception e){
