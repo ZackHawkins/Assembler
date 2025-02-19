@@ -77,19 +77,19 @@ class Converter {
      */
     private void load_mnemonic(){
         mnemonic.put("add", 0);
-        mnemonic.put("addiu", 9);
+        mnemonic.put("addiu", 9); //rt rs immediate
         mnemonic.put("and", 0);
-        mnemonic.put("andi", 12);
-        mnemonic.put("beq", 4);
-        mnemonic.put("bne", 5);
+        mnemonic.put("andi", 12); //rt rs immediate
+        mnemonic.put("beq", 4); //rs rt offset
+        mnemonic.put("bne", 5); //rs rt offset
         mnemonic.put("j", 2);
-        mnemonic.put("lui", 15);
-        mnemonic.put("lw", 35);
+        mnemonic.put("lui", 15); //rt offset
+        mnemonic.put("lw", 35); //rt offset(base)
         mnemonic.put("or", 0);
-        mnemonic.put("ori", 13);
+        mnemonic.put("ori", 13); //rt rs
         mnemonic.put("slt", 0);
         mnemonic.put("sub", 0);
-        mnemonic.put("sw", 43);
+        mnemonic.put("sw", 43); //rt offset(base)
         mnemonic.put("syscall", 0);
         load_function();
     }
@@ -143,37 +143,55 @@ class Converter {
      */
     private String hex_to_decimal(String hex){return String.valueOf(Integer.parseInt(hex, 16));}//base 16
 
-    private String format_i_type_converter() {
-        int opCode = mnemonic.get(instructionArray.get(0));
-        int rs = Integer.parseInt((instructionArray.get(1)));
-        int rt = Integer.parseInt((instructionArray.get(2)));
-        int immediate = Integer.parseInt((instructionArray.get(3)));
-
-        if(immediate < 0) {
-            immediate = twosComplement(immediate, 16);
-        }
-
-        if(opCode == 15) {
-            rs = 0;
-        }
-
-        int instruction = 0;
-
-        instruction = instruction | (opCode << 26);
-        instruction = instruction | (rs << 21);
-        instruction = instruction | (rt << 16);
-        instruction = instruction | (immediate);
-
-        String hexInstruction = String.format("%08x", instruction).replace(' ', '0');
-
-        return hexInstruction;
+    private String rs_rt_order(String op){
+       String result = "";
+        return switch (op) {
+            case "addiu", "andi", "ori" -> "rt_rs";
+            case "beq", "bne" -> "rs_rt";
+            case "lui" -> "lui";
+            case "lw", "sw" -> "rt off(base)";
+            default -> null;
+        };
     }
 
-    private int twosComplement(int value, int bitwidth) {
-        if(value >= 0) {
-            return value;
+    private String format_i_type_converter() {
+        int instruction = 0;
+        int opCode = 0, rt = 0, rs = 0, immediate = 0;
+        switch (rs_rt_order(instructionArray.get(0))){
+            case "rt_rs":
+                opCode = mnemonic.get(instructionArray.get(0));
+                rt = get_register_value(instructionArray.get(1));
+                rs = get_register_value(instructionArray.get(2));
+                immediate = Integer.parseInt(instructionArray.get(3)) & 0xFFFF;
+                break;
+            case "rs_rt":
+                opCode = mnemonic.get(instructionArray.get(0));
+                rs = get_register_value(instructionArray.get(1));
+                rt = get_register_value(instructionArray.get(2));
+                immediate = Integer.parseInt(instructionArray.get(3)) & 0xFFFF;
+                break;
+            case "lui":
+                opCode = mnemonic.get(instructionArray.get(0));
+                rt = get_register_value(instructionArray.get(1));
+                immediate = Integer.parseInt(instructionArray.get(2)) & 0xFFFF;
+                break;
+            case "rt off(base)":
+                opCode = mnemonic.get(instructionArray.get(0));
+                rt = get_register_value(instructionArray.get(1));
+                rs = get_register_value(instructionArray.get(2).substring(instructionArray.get(2).indexOf('(') + 1,instructionArray.get(2).indexOf(')')));
+                String check = instructionArray.get(2).substring(0,instructionArray.get(2).indexOf('('));
+                if(!check.isEmpty()){
+                    immediate = Integer.parseInt(check) & 0xFFFF;
+                }
         }
-        return (1 << bitwidth);
+
+        instruction |= immediate;
+        instruction |= (rt << 16);
+        instruction |= (rs << 21);
+        instruction |= (opCode << 26);
+
+        return String.format("%08x", instruction);
+
     }
 
     /**
