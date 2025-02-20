@@ -997,4 +997,79 @@ af520000 sw $s2, ($k0)# Comment
 01a73022 sub $a2, $t5, $a3
 12b2ff57 beq $s5, $s2, -169
 10d6ffd3 beq $a2, $s6, -45
-011af822 sub $ra, $t0, $k0
+011af822 sub $ra, $t0, $k0 #this is the end of the original test file
+02d45020 add $t2, $s6, $s4# This is the begging of the testcases from another file
+00d20820 add $at, $a2, $s2
+01dd7820 add $t7, $t6, $sp
+0034d020 add $k0, $at, $s4
+01485820 add $t3, $t2, $t0
+2670006e addiu $s0, $s3, 0x6e
+24180074 addiu $t8, $zero, 0x74
+254b0032 addiu $t3, $t2, 0x32
+247affc8 addiu $k0, $v1, 0xffc8
+275e000b addiu $fp, $k0, 11
+00e6c024 and $t8, $a3, $a2
+0235b024 and $s6, $s1, $s5
+005c6824 and $t5, $v0, $gp
+039fb024 and $s6, $gp, $ra
+03ab9024 and $s2, $sp, $t3
+324c0067 andi $t4, $s2, 103
+32feff6b andi $fp, $s7, -149
+31f0ffa9 andi $s0, $t7, 0xffa9
+32b200dd andi $s2, $s5, 221
+3083ff8a andi $v1, $a0, 0xff8a
+124600bb beq $s2, $a2, 187
+1026ff8f beq $at, $a2, -113
+106f00fd beq $v1, $t7, 253
+11c90026 beq $t6, $t1, 0x26
+11f00090 beq $t7, $s0, 0x90
+16100028 bne $s0, $s0, 0x28
+164b00a0 bne $s2, $t3, 0xa0# Comment
+142cffb9 bne $at, $t4, 0xffb9
+15770060 bne $t3, $s7, 0x60
+1492ff67 bne $a0, $s2, 0xff67
+080000c5 j 0xc5
+08000048 j 0x48
+08000015 j 0x15
+08000053 j 0x53# Comment
+0800002d j 0x2d
+3c0300d3 lui $v1, 0xd3
+3c130049 lui $s3, 0x49
+3c0e0085 lui $t6, 0x85
+3c0a00c7 lui $t2, 0xc7
+3c1700d2 lui $s7, 0xd2
+8f240085 lw $a0, 133($t9)
+8f4b002b lw $t3, 43($k0)# Comment
+8ec20000 lw $v0, ($s6)
+8cab0000 lw $t3, ($a1)
+8ffaff8a lw $k0, -118($ra)
+01484025 or $t0, $t2, $t0
+02840025 or $zero, $s4, $a0
+032f4825 or $t1, $t9, $t7
+03181825 or $v1, $t8, $t8
+03c8d025 or $k0, $fp, $t0
+3707005b ori $a3, $t8, 0x5b
+36d7ff17 ori $s7, $s6, -233
+378a003c ori $t2, $gp, 60
+35deff23 ori $fp, $t6, 0xff23
+37c0ffb5 ori $zero, $fp, 0xffb5
+01bc402a slt $t0, $t5, $gp
+009e282a slt $a1, $a0, $fp
+038b182a slt $v1, $gp, $t3
+0011002a slt $zero, $zero, $s1
+03a9d02a slt $k0, $sp, $t1
+003da822 sub $s5, $at, $sp
+0158e822 sub $sp, $t2, $t8# Comment
+03a4a022 sub $s4, $sp, $a0
+02af2822 sub $a1, $s5, $t7
+0277b822 sub $s7, $s3, $s7
+ae4e0000 sw $t6, ($s2)
+afcd0000 sw $t5, ($fp)
+add20000 sw $s2, ($t6)
+ac010027 sw $at, 39($zero)# Comment
+ad6dff4d sw $t5, -179($t3)
+0000000c syscall
+0000000c syscall
+0000000c syscall
+0000000c syscall
+0000000c syscall
