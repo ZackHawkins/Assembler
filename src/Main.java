@@ -58,7 +58,7 @@ class Converter {
      */
     public Converter(String instruction){
         load_mnemonic(); //loads both hashmaps
-        this.instruction = instruction.toLowerCase();
+        this.instruction = instruction;
         this.instructionArray = parse_instruction();
     }
 
