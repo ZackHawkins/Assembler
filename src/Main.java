@@ -49,13 +49,6 @@ class Converter {
         return null;
     }
 
-    /**
-     * returns the arraylist that contains the contents of the passed in assembly
-     * instruction. Each index of the array holds a single piece of passed in assembly instruction
-     * @return arraylist containing the parts to the passed in assembly instruction
-     */
-    public ArrayList<String> get_instruction_array(){return this.instructionArray;}
-
 //------------------------------------------------------ Environment Setup ------------------------------------------------------//
 
     /**
@@ -65,7 +58,7 @@ class Converter {
      */
     public Converter(String instruction){
         load_mnemonic(); //loads both hashmaps
-        this.instruction = instruction.toLowerCase();
+        this.instruction = instruction;
         this.instructionArray = parse_instruction();
     }
 
@@ -143,37 +136,65 @@ class Converter {
      */
     private String hex_to_decimal(String hex){return String.valueOf(Integer.parseInt(hex, 16));}//base 16
 
-    private String format_i_type_converter() {
-        int opCode = mnemonic.get(instructionArray.get(0));
-        int rs = Integer.parseInt((instructionArray.get(1)));
-        int rt = Integer.parseInt((instructionArray.get(2)));
-        int immediate = Integer.parseInt((instructionArray.get(3)));
-
-        if(immediate < 0) {
-            immediate = twosComplement(immediate, 16);
-        }
-
-        if(opCode == 15) {
-            rs = 0;
-        }
-
-        int instruction = 0;
-
-        instruction = instruction | (opCode << 26);
-        instruction = instruction | (rs << 21);
-        instruction = instruction | (rt << 16);
-        instruction = instruction | (immediate);
-
-        String hexInstruction = String.format("%08x", instruction).replace(' ', '0');
-
-        return hexInstruction;
+    /**
+     * helper method to for format_i_type_converter, this method will return a specific string
+     * depending on opcode. That string is used in format_i_type_converter to determine what order
+     * our variables need to check the array
+     * @param op opcode string type
+     * @return coded string
+     */
+    private String rs_rt_order(String op){
+        return switch (op) {
+            case "addiu", "andi", "ori" -> "rt_rs";
+            case "beq", "bne" -> "rs_rt";
+            case "lui" -> "lui";
+            case "lw", "sw" -> "rt off(base)";
+            default -> "";
+        };
     }
 
-    private int twosComplement(int value, int bitwidth) {
-        if(value >= 0) {
-            return value;
+    /**
+     * converts I-type assembly instruction into hexadecimal notation
+     * @return String of hexadecimal
+     */
+    private String format_i_type_converter() {
+        int instruction = 0;
+        int opCode = 0, rt = 0, rs = 0, immediate = 0;
+        switch (rs_rt_order(instructionArray.get(0))){
+            case "rt_rs":
+                opCode = mnemonic.get(instructionArray.get(0));
+                rt = get_register_value(instructionArray.get(1));
+                rs = get_register_value(instructionArray.get(2));
+                immediate = Integer.parseInt(instructionArray.get(3)) & 0xFFFF;
+                break;
+            case "rs_rt":
+                opCode = mnemonic.get(instructionArray.get(0));
+                rs = get_register_value(instructionArray.get(1));
+                rt = get_register_value(instructionArray.get(2));
+                immediate = Integer.parseInt(instructionArray.get(3)) & 0xFFFF;
+                break;
+            case "lui":
+                opCode = mnemonic.get(instructionArray.get(0));
+                rt = get_register_value(instructionArray.get(1));
+                immediate = Integer.parseInt(instructionArray.get(2)) & 0xFFFF;
+                break;
+            case "rt off(base)":
+                opCode = mnemonic.get(instructionArray.get(0));
+                rt = get_register_value(instructionArray.get(1));
+                rs = get_register_value(instructionArray.get(2).substring(instructionArray.get(2).indexOf('(') + 1,instructionArray.get(2).indexOf(')')));
+                String check = instructionArray.get(2).substring(0,instructionArray.get(2).indexOf('('));
+                if(!check.isEmpty()){
+                    immediate = Integer.parseInt(check) & 0xFFFF;
+                }
         }
-        return (1 << bitwidth);
+
+        instruction |= immediate;
+        instruction |= (rt << 16);
+        instruction |= (rs << 21);
+        instruction |= (opCode << 26);
+
+        return String.format("%08x", instruction);
+
     }
 
     /**
