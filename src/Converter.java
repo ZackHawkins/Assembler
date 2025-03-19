@@ -4,10 +4,10 @@ import java.util.StringTokenizer;
 
 public class Converter {
 
-    private final HashMap<String, Integer> mnemonic = new HashMap<>(); //hashmap for instruction opcode and corresponding binary value (6-Bit)
-    private final HashMap<String, Integer> function = new HashMap<>(); //hashmap for function binary value (6-Bit) for R-Type
-    private  ArrayList<String> instructionArray; //passed in instruction parsed into an array
-    private  String instruction; //instruction from the command line
+    private final HashMap<String, Integer> mnemonic; //hashmap for instruction opcode and corresponding binary value (6-Bit)
+    private final HashMap<String, Integer> function; //hashmap for function binary value (6-Bit) for R-Type
+    private ArrayList<String> instructionArray; //passed in instruction parsed into an array
+    private String instruction; //instruction from the command line
 
 //------------------------------------------------------ Public Method Calls ------------------------------------------------------//
 
@@ -20,6 +20,7 @@ public class Converter {
             case "R-type" -> format_r_type_converter();
             case "I-type" -> format_i_type_converter();
             case "J-type" -> format_j_type_converter();
+            case "Pseudo-Instruction" -> pseudo_instruction();
             default -> null;
         };
     }
@@ -34,7 +35,13 @@ public class Converter {
                 return "J-type";
             } else if (function.containsKey(instructionArray.get(0))) {
                 return "R-type";
-            }
+            } else if(
+                   instructionArray.get(0).equals("li")
+                   || instructionArray.get(0).equals("la")
+                   || instructionArray.get(0).equals("blt")
+                   || instructionArray.get(0).equals("move")
+                )
+                return "Pseudo-Instruction";
             return "I-type";
         } catch (IndexOutOfBoundsException iobe) {
             System.out.println(iobe.getMessage());
@@ -49,7 +56,8 @@ public class Converter {
      */
     public void new_instruction(String instruction){
         this.instruction = instruction.toLowerCase();
-        this.instructionArray = parse_instruction();
+        this.instructionArray.clear();
+        parse_instruction();
     }
 
 //------------------------------------------------------ Environment Setup ------------------------------------------------------//
@@ -68,6 +76,9 @@ public class Converter {
      * @param instruction String
      */
     public Converter(String instruction){
+        this.mnemonic = new HashMap<String, Integer>();
+        this.function = new HashMap<String, Integer>();
+        this.instructionArray = new ArrayList<String>();
         load_mnemonic(); //loads both hashmaps
         new_instruction(instruction);
     }
@@ -116,25 +127,23 @@ public class Converter {
      * is reached or when the comment character '#' is reached
      * @delimiter COMMA, SPACE
      */
-    private ArrayList<String> parse_instruction(){
+    private void parse_instruction(){
         StringTokenizer tokenizer = new StringTokenizer(instruction, " ,");
-        ArrayList<String> temp = new ArrayList<>();
         while(tokenizer.hasMoreTokens()){
             String token = tokenizer.nextToken();
             if(token.contains("#")){ //checks to see if '#' is attached to one of the valid instruction pieces, '#' = start of comment
                 token = token.substring(0, token.indexOf('#')); //detaches '#' from valid instruction piece
-                if(!token.isEmpty()){temp.add(token);} //add only the valid instruction piece, if token was only '#' -> token would be EMPTY
+                if(!token.isEmpty()){this.instructionArray.add(token);} //add only the valid instruction piece, if token was only '#' -> token would be EMPTY
                 break;
             }
-            temp.add(token);
+            this.instructionArray.add(token);
         }
         try {
-            int lastElement = temp.size() - 1; //last element in arrayList
-            if (temp.get(lastElement).contains("0x")) {temp.set(lastElement, hex_to_decimal(temp.get(lastElement).substring(2)));} //Converts last instruction value to integer if it is a hexadecimal, 2 is the offset since it is in hexadecimal '0x..'
+            int lastElement = this.instructionArray.size() - 1; //last element in arrayList
+            if (this.instructionArray.get(lastElement).contains("0x") && !(get_format_type().equals("Pseudo-Instruction"))) {this.instructionArray.set(lastElement, hex_to_decimal(this.instructionArray.get(lastElement).substring(2)));} //Converts last instruction value to integer if it is a hexadecimal, 2 is the offset since it is in hexadecimal '0x..'
         } catch (IndexOutOfBoundsException ioube){
             System.out.println(ioube.getMessage());
         }
-        return temp;
     }
 
 //------------------------------------------------------ Converters ------------------------------------------------------//
@@ -145,6 +154,10 @@ public class Converter {
      * @return hexadecimal converted into decimal notation and returned as a String
      */
     private String hex_to_decimal(String hex){return String.valueOf(Integer.parseInt(hex, 16));}//base 16
+
+    private String pseudo_instruction(){
+      return this.instructionArray.get(2);
+    }
 
     /**
      * helper method to for format_i_type_converter, this method will return a specific string

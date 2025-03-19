@@ -6,8 +6,9 @@ import java.io.FileReader;
 
 public class ConverterTest {
     Converter test = new Converter();
+
     @Test
-    public void test_file() {
+    public void convert_instruction_to_hex_test() {
         try (BufferedReader reader = new BufferedReader(new FileReader("test_instructions.txt")))
         {
             int fileLine = 1;
