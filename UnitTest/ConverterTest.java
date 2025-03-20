@@ -27,7 +27,7 @@ public class ConverterTest {
 
     @Test
     public void test_pseudo_instruction(){
-        test.new_instruction("li $v0, 4");
+        test.new_instruction("li $v0, 0x3BF20");
         System.out.println(test.instruction_to_hex());
     }
 }

@@ -189,7 +189,20 @@ public class Converter {
                     this.instructionArray.add("$zero");
                     this.instructionArray.add(Integer.toString(immediate));
                     answer = instruction_to_hex();
+                } else {
+                    this.instructionArray.add("lui");
+                    this.instructionArray.add("$at");
+                    this.instructionArray.add(Integer.toString(immediate >> 16));
+                    answer += instruction_to_hex();
+                    answer += "\n";
+                    this.instructionArray.set(0, "ori");
+                    this.instructionArray.set(1, register);
+                    this.instructionArray.set(2, "$at");
+                    this.instructionArray.add(Integer.toString(immediate & 0xFFFF));
+                    answer += instruction_to_hex();
                 }
+            case "la":
+                
         }
         return answer;
     }
