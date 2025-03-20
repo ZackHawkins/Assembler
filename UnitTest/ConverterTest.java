@@ -24,4 +24,10 @@ public class ConverterTest {
             System.out.println(e.getMessage());
         }
     }
+
+    @Test
+    public void test_pseudo_instruction(){
+        test.new_instruction("li $v0, 4");
+        System.out.println(test.instruction_to_hex());
+    }
 }
