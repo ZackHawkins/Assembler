@@ -89,6 +89,7 @@ public class DataConverter {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        // return an array of addresses that each piece of data is at
         return addresses;
     }
 }
