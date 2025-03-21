@@ -4,22 +4,25 @@ import java.util.StringTokenizer;
 
 public class Converter {
 
-    private final HashMap<String, Integer> mnemonic = new HashMap<>(); //hashmap for instruction opcode and corresponding binary value (6-Bit)
-    private final HashMap<String, Integer> function = new HashMap<>(); //hashmap for function binary value (6-Bit) for R-Type
-    private  ArrayList<String> instructionArray; //passed in instruction parsed into an array
-    private  String instruction; //instruction from the command line
+    private final HashMap<String, Integer> mnemonic; //hashmap for instruction opcode and corresponding binary value (6-Bit)
+    private final HashMap<String, Integer> function; //hashmap for function binary value (6-Bit) for R-Type
+    private ArrayList<String> instructionArray; //passed in instruction parsed into an array
+    private String instruction; //instruction from the command line
+    private final HashMap<String, Integer> data;
 
 //------------------------------------------------------ Public Method Calls ------------------------------------------------------//
 
     /**
      * returns assembly instruction as a String in hexadecimal notation
+     *
      * @return String
      */
-    public String instruction_to_hex(){
+    public String instruction_to_hex() {
         return switch (get_format_type()) {
             case "R-type" -> format_r_type_converter();
             case "I-type" -> format_i_type_converter();
             case "J-type" -> format_j_type_converter();
+            case "Pseudo-Instruction" -> pseudo_instruction();
             default -> null;
         };
     }
@@ -28,13 +31,18 @@ public class Converter {
      * determines what type of instruction is being called upon.
      * It could be I-type, R-type, J-type or syscall
      */
-    public String get_format_type(){
+    public String get_format_type() {
         try {
             if (instructionArray.get(0).equals("j")) {
                 return "J-type";
             } else if (function.containsKey(instructionArray.get(0))) {
                 return "R-type";
-            }
+            } else if (
+                    instructionArray.get(0).equals("li")
+                            || instructionArray.get(0).equals("la")
+                            || instructionArray.get(0).equals("blt")
+                            || instructionArray.get(0).equals("move")
+            ) return "Pseudo-Instruction";
             return "I-type";
         } catch (IndexOutOfBoundsException iobe) {
             System.out.println(iobe.getMessage());
@@ -45,40 +53,46 @@ public class Converter {
     /**
      * new_instruction is a public method created for efficiency reasons. This method is to allow the
      * same converter object to convert a new set of instructions to hexa-decimal
+     *
      * @param instruction String
      */
-    public void new_instruction(String instruction){
-        this.instruction = instruction.toLowerCase();
-        this.instructionArray = parse_instruction();
+    public void new_instruction(String instruction) {
+        this.instruction = instruction;
+        this.instructionArray.clear();
+        parse_instruction();
     }
+
+    /**
+     * get the hashmap that holds the string labels in the .data section and the integer
+     * value of the labels associated hexadecimal value
+     * @return HashMap<String, Integer> of the label, hexadecimal value in integer format of labels in .data
+     */
+    public HashMap<String,Integer> get_data_information(){return this.data;}
 
 //------------------------------------------------------ Environment Setup ------------------------------------------------------//
 
     /**
-     * zero-parameter constructor will call the specifying constructor with "null" being the
-     * passed in parameter
-     */
-    public Converter(){
-        this("null");
-    }
-
-    /**
      * specifying constructor sets the instruction variable from what was passed
      * in as a string
-     * @param instruction String
+     *
+     * @param inFile String
      */
-    public Converter(String instruction){
+    public Converter(String inFile) {
+        this.data = DataConverter.processAsmFile(inFile);
+        this.mnemonic = new HashMap<String, Integer>();
+        this.function = new HashMap<String, Integer>();
+        this.instructionArray = new ArrayList<String>();
         load_mnemonic(); //loads both hashmaps
-        new_instruction(instruction);
     }
 
     /**
      * loading the mnemonic hashmap with the op code of
      * the associated instruction and calls the other
      * hashmap loader
+     *
      * @calls load_function
      */
-    private void load_mnemonic(){
+    private void load_mnemonic() {
         mnemonic.put("add", 0);
         mnemonic.put("addiu", 9);
         mnemonic.put("and", 0);
@@ -101,7 +115,7 @@ public class Converter {
      * loading the function hashmap with the func of the
      * associated instruction (R-type)
      */
-    private void load_function(){
+    private void load_function() {
         function.put("add", 32);
         function.put("and", 36);
         function.put("or", 37);
@@ -114,27 +128,30 @@ public class Converter {
      * Tokenizes a string (instruction) and appends each valid token to
      * a list. Returns tokenized list once the end of the instruction string
      * is reached or when the comment character '#' is reached
+     *
      * @delimiter COMMA, SPACE
      */
-    private ArrayList<String> parse_instruction(){
+    private void parse_instruction() {
         StringTokenizer tokenizer = new StringTokenizer(instruction, " ,");
-        ArrayList<String> temp = new ArrayList<>();
-        while(tokenizer.hasMoreTokens()){
+        while (tokenizer.hasMoreTokens()) {
             String token = tokenizer.nextToken();
-            if(token.contains("#")){ //checks to see if '#' is attached to one of the valid instruction pieces, '#' = start of comment
+            if (token.contains("#")) { //checks to see if '#' is attached to one of the valid instruction pieces, '#' = start of comment
                 token = token.substring(0, token.indexOf('#')); //detaches '#' from valid instruction piece
-                if(!token.isEmpty()){temp.add(token);} //add only the valid instruction piece, if token was only '#' -> token would be EMPTY
+                if (!token.isEmpty()) {
+                    this.instructionArray.add(token);
+                } //add only the valid instruction piece, if token was only '#' -> token would be EMPTY
                 break;
             }
-            temp.add(token);
+            this.instructionArray.add(token);
         }
         try {
-            int lastElement = temp.size() - 1; //last element in arrayList
-            if (temp.get(lastElement).contains("0x")) {temp.set(lastElement, hex_to_decimal(temp.get(lastElement).substring(2)));} //Converts last instruction value to integer if it is a hexadecimal, 2 is the offset since it is in hexadecimal '0x..'
-        } catch (IndexOutOfBoundsException ioube){
+            int lastElement = this.instructionArray.size() - 1; //last element in arrayList
+            if (this.instructionArray.get(lastElement).contains("0x")) {
+                this.instructionArray.set(lastElement, hex_to_decimal(this.instructionArray.get(lastElement).substring(2)));
+            } //Converts last instruction value to integer if it is a hexadecimal, 2 is the offset since it is in hexadecimal '0x..'
+        } catch (IndexOutOfBoundsException ioube) {
             System.out.println(ioube.getMessage());
         }
-        return temp;
     }
 
 //------------------------------------------------------ Converters ------------------------------------------------------//
@@ -144,9 +161,68 @@ public class Converter {
      * @param hex String
      * @return hexadecimal converted into decimal notation and returned as a String
      */
-    private String hex_to_decimal(String hex){return String.valueOf(Integer.parseInt(hex, 16));}//base 16
+    private String hex_to_decimal(String hex) {
+        return String.valueOf(Integer.parseInt(hex, 16));
+    }
 
     /**
+     * decimal_to_hex is a method that take sin an integer and returns the hexadecimal notation in
+     * base 16 format
+     * @param decimal int
+     * @return a string of the hexadecimal notation from the passed in integer
+     */
+    private String decimal_to_hex(int decimal) {
+        return Integer.toHexString(decimal);
+    }
+
+    /**
+     * pseudo_instruction is a method that converts an instruction in assembly
+     * to an alternative set of instructions
+     * @return returns the hexadecimal interpretation of the instruction as a String
+     */
+    private String pseudo_instruction(){
+        String answer = "";
+        String register = this.instructionArray.get(1);
+        String register2 = "";
+        int immediate = 0;
+        String inst = this.instructionArray.get(0);
+        switch (inst) {
+            case "move" -> register2 = this.instructionArray.get(2);
+            case "la" -> immediate = this.data.get(this.instructionArray.get(2));
+            case "li" -> immediate = Integer.parseInt(this.instructionArray.get(2));
+        }
+        this.instructionArray.clear();
+        switch(inst){
+            case "li","la":
+                if(immediate <= 0xFFFF){
+                    this.instructionArray.add("addiu");
+                    this.instructionArray.add(register);
+                    this.instructionArray.add("$zero");
+                    this.instructionArray.add(Integer.toString(immediate));
+                    answer = instruction_to_hex();
+                } else {
+                    this.instructionArray.add("lui");
+                    this.instructionArray.add("$at");
+                    this.instructionArray.add(Integer.toString(immediate >> 16));
+                    answer += instruction_to_hex();
+                    answer += "\n";
+                    this.instructionArray.set(0, "ori");
+                    this.instructionArray.set(1, register);
+                    this.instructionArray.set(2, "$at");
+                    this.instructionArray.add(Integer.toString(immediate & 0xFFFF));
+                    answer += instruction_to_hex();
+                }
+            case "move":
+                this.instructionArray.add("add");
+                this.instructionArray.add(register);
+                this.instructionArray.add(register2);
+                this.instructionArray.add("$zero");
+        }       answer = instruction_to_hex();
+        return answer;
+    }
+
+
+     /**
      * helper method to for format_i_type_converter, this method will return a specific string
      * depending on opcode. That string is used in format_i_type_converter to determine what order
      * our variables need to check the array
@@ -168,8 +244,7 @@ public class Converter {
      * @return String of hexadecimal
      */
     private String format_i_type_converter() {
-        int instruction = 0;
-        int opCode = 0, rt = 0, rs = 0, immediate = 0;
+        int opCode = 0, rt = 0, rs = 0, immediate = 0, instruction = 0;
         switch (rs_rt_order(instructionArray.get(0))){
             case "rt_rs":
                 opCode = mnemonic.get(instructionArray.get(0));
