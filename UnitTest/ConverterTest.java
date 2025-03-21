@@ -26,8 +26,14 @@ public class ConverterTest {
     }
 
     @Test
-    public void test_pseudo_instruction(){
+    public void test_li_pseudo_instruction(){
         test.new_instruction("li $v0, 0x3BF20");
+        System.out.println(test.instruction_to_hex());
+    }
+
+    @Test
+    public void test_la_pseudo_instruction(){
+        test.new_instruction("la $a0, input_request");
         System.out.println(test.instruction_to_hex());
     }
 }

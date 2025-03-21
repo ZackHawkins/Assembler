@@ -8,6 +8,7 @@ public class Converter {
     private final HashMap<String, Integer> function; //hashmap for function binary value (6-Bit) for R-Type
     private ArrayList<String> instructionArray; //passed in instruction parsed into an array
     private String instruction; //instruction from the command line
+    private final HashMap<String, Integer> data;
 
 //------------------------------------------------------ Public Method Calls ------------------------------------------------------//
 
@@ -81,6 +82,7 @@ public class Converter {
         this.mnemonic = new HashMap<String, Integer>();
         this.function = new HashMap<String, Integer>();
         this.instructionArray = new ArrayList<String>();
+        this.data = DataConverter.processAsmFile("EvenOrOdd.asm");
         load_mnemonic(); //loads both hashmaps
         new_instruction(instruction);
     }
@@ -177,12 +179,14 @@ public class Converter {
 
     private String pseudo_instruction(){
         String answer = "";
+        int immediate;
         String inst = this.instructionArray.get(0);
         String register = this.instructionArray.get(1);
-        int immediate = Integer.parseInt(this.instructionArray.get(2));
+        if(inst.equals("la")) immediate = this.data.get(this.instructionArray.get(2));
+        else immediate = Integer.parseInt(this.instructionArray.get(2));
         this.instructionArray.clear();
         switch(inst){
-            case "li":
+            case "li","la":
                 if(immediate <= 0xFFFF){
                     this.instructionArray.add("addiu");
                     this.instructionArray.add(register);
@@ -201,8 +205,6 @@ public class Converter {
                     this.instructionArray.add(Integer.toString(immediate & 0xFFFF));
                     answer += instruction_to_hex();
                 }
-            case "la":
-                
         }
         return answer;
     }

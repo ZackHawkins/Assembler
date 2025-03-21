@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.HashMap;
 import java.util.regex.*;
 
 public class DataConverter {
@@ -28,11 +29,11 @@ public class DataConverter {
     }
 
     // Process the ASM file and convert to .data format
-    public static int[] processAsmFile(String inputFile) {
+    public static HashMap<String, Integer> processAsmFile(String inputFile) {
         // Generate the output file name by replacing .asm with .data
         String outputFile = inputFile.replaceAll("\\.asm$", "\\.data");
         int currentAddress = 0x10010000; // Starting address
-        int[] addresses = new int[100];
+        HashMap<String, Integer> addresses = new HashMap<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(inputFile));
              BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile))) {
@@ -40,7 +41,6 @@ public class DataConverter {
             String line;
             boolean dataSectionFound = false;
             int lineNumber = 1;
-            int addressIndex = 0;
 
             while ((line = br.readLine()) != null) {
                 line = line.trim();
@@ -53,7 +53,7 @@ public class DataConverter {
 
                 // If the data section is found, process data lines
                 if (dataSectionFound) {
-                    Pattern pattern = Pattern.compile("^\\s*(\\w+)\\s+db\\s+\"(.*)\"$");
+                    Pattern pattern = Pattern.compile("^\\s*(\\w+):\\s+\\.asciiz\\s+\"(.*)\"$");
                     Matcher matcher = pattern.matcher(line);
 
                     if (matcher.matches()) {
@@ -66,15 +66,13 @@ public class DataConverter {
                         int dataLength = dataValue.length();
 
                         // Store address
-                        addresses[addressIndex] = currentAddress;
-
+                        addresses.put(dataLabel, currentAddress);
 
                         // Write the line number and the little-endian hex data to the output file
                         bw.write(String.format("%04d %s%n", lineNumber, littleEndianHex));
                         lineNumber++;
 
                         currentAddress += dataLength;
-                        addressIndex++;
                     }
                 }
 
