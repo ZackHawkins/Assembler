@@ -57,34 +57,32 @@ public class Converter {
      * @param instruction String
      */
     public void new_instruction(String instruction) {
-        this.instruction = instruction.toLowerCase();
+        this.instruction = instruction;
         this.instructionArray.clear();
         parse_instruction();
     }
 
-//------------------------------------------------------ Environment Setup ------------------------------------------------------//
-
     /**
-     * zero-parameter constructor will call the specifying constructor with "null" being the
-     * passed in parameter
+     * get the hashmap that holds the string labels in the .data section and the integer
+     * value of the labels associated hexadecimal value
+     * @return HashMap<String, Integer> of the label, hexadecimal value in integer format of labels in .data
      */
-    public Converter() {
-        this("null");
-    }
+    public HashMap<String,Integer> get_data_information(){return this.data;}
+
+//------------------------------------------------------ Environment Setup ------------------------------------------------------//
 
     /**
      * specifying constructor sets the instruction variable from what was passed
      * in as a string
      *
-     * @param instruction String
+     * @param inFile String
      */
-    public Converter(String instruction) {
+    public Converter(String inFile) {
+        this.data = DataConverter.processAsmFile(inFile);
         this.mnemonic = new HashMap<String, Integer>();
         this.function = new HashMap<String, Integer>();
         this.instructionArray = new ArrayList<String>();
-        this.data = DataConverter.processAsmFile("EvenOrOdd.asm");
         load_mnemonic(); //loads both hashmaps
-        new_instruction(instruction);
     }
 
     /**
@@ -177,6 +175,11 @@ public class Converter {
         return Integer.toHexString(decimal);
     }
 
+    /**
+     * pseudo_instruction is a method that converts an instruction in assembly
+     * to an alternative set of instructions
+     * @return returns the hexadecimal interpretation of the instruction as a String
+     */
     private String pseudo_instruction(){
         String answer = "";
         String register = this.instructionArray.get(1);
