@@ -36,4 +36,10 @@ public class ConverterTest {
         test.new_instruction("la $a0, input_request");
         System.out.println(test.instruction_to_hex());
     }
+
+    @Test
+    public void test_move_pseudo_instruction(){
+        test.new_instruction("move $a0, $a1");
+        System.out.println(test.instruction_to_hex());
+    }
 }

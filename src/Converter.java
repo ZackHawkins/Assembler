@@ -179,11 +179,15 @@ public class Converter {
 
     private String pseudo_instruction(){
         String answer = "";
-        int immediate;
-        String inst = this.instructionArray.get(0);
         String register = this.instructionArray.get(1);
-        if(inst.equals("la")) immediate = this.data.get(this.instructionArray.get(2));
-        else immediate = Integer.parseInt(this.instructionArray.get(2));
+        String register2 = "";
+        int immediate = 0;
+        String inst = this.instructionArray.get(0);
+        switch (inst) {
+            case "move" -> register2 = this.instructionArray.get(2);
+            case "la" -> immediate = this.data.get(this.instructionArray.get(2));
+            case "li" -> immediate = Integer.parseInt(this.instructionArray.get(2));
+        }
         this.instructionArray.clear();
         switch(inst){
             case "li","la":
@@ -205,7 +209,12 @@ public class Converter {
                     this.instructionArray.add(Integer.toString(immediate & 0xFFFF));
                     answer += instruction_to_hex();
                 }
-        }
+            case "move":
+                this.instructionArray.add("add");
+                this.instructionArray.add(register);
+                this.instructionArray.add(register2);
+                this.instructionArray.add("$zero");
+        }       answer = instruction_to_hex();
         return answer;
     }
 
