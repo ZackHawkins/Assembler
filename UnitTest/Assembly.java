@@ -4,6 +4,6 @@ public class Assembly {
 
     @Test
     public void create_TextConverter_object_test(){
-        TextConverter test = new TextConverter("EvenOrOdd.asm");
+        TextConverter.process_asm_file("EvenOrOdd.asm");
     }
 }

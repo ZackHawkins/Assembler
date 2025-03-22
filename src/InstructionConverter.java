@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 
-public class Converter {
+public class InstructionConverter {
 
     private final HashMap<String, Integer> mnemonic; //hashmap for instruction opcode and corresponding binary value (6-Bit)
     private final HashMap<String, Integer> function; //hashmap for function binary value (6-Bit) for R-Type
@@ -77,7 +77,7 @@ public class Converter {
      *
      * @param inFile String
      */
-    public Converter(String inFile) {
+    public InstructionConverter(String inFile) {
         this.data = DataConverter.processAsmFile(inFile);
         this.mnemonic = new HashMap<String, Integer>();
         this.function = new HashMap<String, Integer>();
@@ -211,13 +211,16 @@ public class Converter {
                     this.instructionArray.set(2, "$at");
                     this.instructionArray.add(Integer.toString(immediate & 0xFFFF));
                     answer += instruction_to_hex();
+                    break;
                 }
             case "move":
                 this.instructionArray.add("add");
                 this.instructionArray.add(register);
                 this.instructionArray.add(register2);
                 this.instructionArray.add("$zero");
-        }       answer = instruction_to_hex();
+                answer = instruction_to_hex();
+                break;
+        }
         return answer;
     }
 
