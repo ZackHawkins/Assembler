@@ -67,7 +67,7 @@ public class InstructionConverter {
 //------------------------------------------------------ Environment Setup ------------------------------------------------------//
 
     public InstructionConverter(){
-        this("#null");
+        this("null");
     }
 
     /**

@@ -107,8 +107,7 @@ public class DataConverter {
 
                         // The length of the data piece, this is used to calculate the address for
                         // the piece of data being stored in the hashmap
-                        int dataLength = dataValue.length();
-
+                        int dataLength = dataValue.length() + 1;
                         // Store address of the data piece along with it's label
                         addresses.put(dataLabel, currentAddress);
 
@@ -135,7 +134,7 @@ public class DataConverter {
             }
 
 
-            System.out.println("Data section has been converted and saved to " + outputFile);
+            System.out.println("Data section has been converted and saved to " + outputFile.substring(outputFile.lastIndexOf('/')+1));
 
         } catch (IOException e) {
             e.printStackTrace();

@@ -4,6 +4,7 @@ import java.util.StringTokenizer;
 
 public class Main {
     public static void main(String[] args) {
-        TextConverter converter = new TextConverter(args[0]);
+        String fileLocation = "../../../" + args[0]; //backtracking to file location in the Assembler directory, not the jar directory
+        new TextConverter(fileLocation);
     }
 }
