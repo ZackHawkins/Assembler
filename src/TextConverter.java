@@ -57,16 +57,16 @@ public class TextConverter {
         }
         switch(inst){
             case "li","la":
-                if(immediate <= 0xFFFF) this.currentAddress += 0x00000004;
-                else this.currentAddress += 0x00000008;
+                if(immediate <= 0xFFFF) this.currentAddress += 4;
+                else this.currentAddress += 8;
                 break;
             case "move":
-                this.currentAddress += 0x00000004;
+                this.currentAddress += 4;
                 break;
             case "blt":
-                this.currentAddress += 0x00000008;
+                this.currentAddress += 8;
                 break;
-            default: this.currentAddress += 0x00000004; //is a branch instruction or a jump instruction
+            default: this.currentAddress += 4; //is a branch instruction or a jump instruction
         }
     }
 
@@ -100,7 +100,7 @@ public class TextConverter {
                 if(is_pseudo_branch_instruction(currentInstruction.get(0))){
                     calculate_number_of_pseudo_instruction(currentInstruction);
                 } else {
-                    this.currentAddress += 0x00000004;
+                    this.currentAddress += 4;
                 }
             }
         } catch (IOException io){
@@ -128,7 +128,7 @@ public class TextConverter {
             case "la" -> value = this.data.get(instructionArray.get(2));
             case "li" -> value = Integer.parseInt(instructionArray.get(2));
             case "blt" -> {register2 = instructionArray.get(2); value = ((this.labels.get(instructionArray.get(3)) - (this.currentAddress + 4)) / 4);}
-            case "j" -> value = this.labels.get(instructionArray.get(1));
+            case "j" -> value = this.labels.get(instructionArray.get(1)) >> 2;
             case "bne", "beq" -> {value = ((this.labels.get(instructionArray.get(3)) - (this.currentAddress + 4)) / 4); register2=instructionArray.get(2);}
         }
 
@@ -181,12 +181,12 @@ public class TextConverter {
                break;
             case "j":
                 newInstruction.add("j");
-                newInstruction.add(Integer.toString(value >> 2));
+                newInstruction.add(Integer.toString(value));
                 this.converter.new_instruction(newInstruction);
                 answer = this.converter.instruction_to_hex();
                 break;
             case "beq","bne":
-                newInstruction.add("beq");
+                newInstruction.add(inst);
                 newInstruction.add(register);
                 newInstruction.add(register2);
                 newInstruction.add(Integer.toString(value));

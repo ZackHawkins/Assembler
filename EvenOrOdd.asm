@@ -2,6 +2,7 @@
 	input_request:	.asciiz	"Enter your integer: "
 	even_output:	.asciiz	"Your integer is EVEN!"
 	odd_output:	.asciiz	"Your integer is ODD!"
+	newLine:        .asciiz "\n"
 .text
 
 	# prompt the user for input
