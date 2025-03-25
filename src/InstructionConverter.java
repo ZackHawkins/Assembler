@@ -63,6 +63,7 @@ public class InstructionConverter {
 
     public ArrayList<String> get_instruction_array(){return this.instructionArray;}
 
+    public int convert_register_to_value(String register){return get_register_value(register);}
 
 //------------------------------------------------------ Environment Setup ------------------------------------------------------//
 
