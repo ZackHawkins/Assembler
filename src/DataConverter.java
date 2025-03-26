@@ -4,8 +4,19 @@ import java.util.regex.*;
 
 public class DataConverter {
 
-    // Convert a string into an array of bytes
+    /**
+     * Converts a string of data into an array of bytes
+     *
+     * @param data the string to convert
+     * @return the byte array containing the data from the string
+     */
     private static byte[] stringToBytes(String data) {
+        // Since java converts \n. \t etc into \\n we have to handle that or the
+        // corresponding hexadecimal conversion will be wrong
+        data = data.replace("\\n", "\n")
+                .replace("\\t", "\t")
+                .replace("\\\"", "\"")
+                .replace("\\\\", "\\");
         byte[] byteArray = new byte[data.length() + 1];
         for (int i = 0; i < data.length(); i++) {
             byteArray[i] = (byte) data.charAt(i);
@@ -13,7 +24,12 @@ public class DataConverter {
         return byteArray;
     }
 
-    // Convert a byte array to little endian formatted string of hexadecimal
+    /**
+     * Converts a byte array to a little endian formatted string of hexadecimal characters
+     *
+     * @param byteArray the byte array to format
+     * @return the little endian formatted byte array
+     */
     private static String convertLittleEndian(byte[] byteArray) {
         StringBuilder littleEndianHex = new StringBuilder();
 
@@ -42,19 +58,34 @@ public class DataConverter {
         return littleEndianResult.toString();
     }
 
-    // Converts a hex string into a byte array, this is used to convert the large string
-    // of combined data into a byte array to be used in little endian conversion
-    private static byte[] hexStringToByteArray(String s) {
-        int len = s.length();
+    /**
+     * Converts a hex string into a byte array, this is used to convert the large
+     * string of combined data into a byte array to be used in little endian
+     * convertion
+     *
+     * @param hexString the string of hexadecimal to turn into a byte array
+     * @return the byte array of the hexadecimal characters
+     */
+    private static byte[] hexStringToByteArray(String hexString) {
+        int len = hexString.length();
         byte[] data = new byte[len / 2];
         for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i + 1), 16));
+            data[i / 2] = (byte) ((Character.digit(hexString.charAt(i), 16) << 4)
+                    + Character.digit(hexString.charAt(i + 1), 16));
         }
         return data;
     }
 
-    // Process the ASM file and convert to .data format
+    /**
+     * Processes the ASM file specifically the .data section. This function
+     * will read through the ASM file until it reaches .data and then begin converting
+     * those lines into hexadecimal before writing them to the out file which should
+     * be a .data file. This also saved the addresses of those lines, specifically the labels,
+     * into a hashmap to be returned so the .text section can use the addresses in processing
+     *
+     * @param inputFile the ASM file to read from and process
+     * @return a hashmap of the addresses of the labels in the .data section
+     */
     public static HashMap<String, Integer> processAsmFile(String inputFile) {
         // Generate the output file name by replacing .asm with .data
         String outputFile = inputFile.replaceAll("\\.asm$", "\\.data");
