@@ -109,6 +109,18 @@ public class TextConverter {
     }
 
     /**
+     * calculate_offset is a method used for determining the offset of labels used in branch instructions
+     * @param label current label being used in instruction
+     * @param instruction op
+     * @return integer of the offset from current instruction to the label that is being jumped to
+     */
+    private int calculate_offset(String label, String instruction){
+        int offset = 4;
+        if(instruction.equals("blt")) offset = 8;
+        return (this.labels.get(label) - (this.currentAddress + offset)) / 4;
+    }
+
+    /**
      * pseudo_branch_instruction is a method that returns the hexadecimal notation of the current instruction. This
      * method is used for pseudo, branch, and jump instructions. The method will replace the proper instructions for
      * InstructionConverter to interpret and perform the hexadecimal calculations on.
@@ -127,9 +139,11 @@ public class TextConverter {
             case "move" -> register2 = instructionArray.get(2);
             case "la" -> value = this.data.get(instructionArray.get(2));
             case "li" -> value = Integer.parseInt(instructionArray.get(2));
-            case "blt" -> {register2 = instructionArray.get(2); value = ((this.labels.get(instructionArray.get(3)) - (this.currentAddress + 4)) / 4);}
+            case "bne","beq", "blt" -> {
+                register2 = instructionArray.get(2);
+                value = calculate_offset(instructionArray.get(3), inst);
+            }
             case "j" -> value = this.labels.get(instructionArray.get(1)) >> 2;
-            case "bne", "beq" -> {value = ((this.labels.get(instructionArray.get(3)) - (this.currentAddress + 4)) / 4); register2=instructionArray.get(2);}
         }
 
         switch(inst){
@@ -157,10 +171,10 @@ public class TextConverter {
                 }
                 break;
             case "move":
-                newInstruction.add("add");
+                newInstruction.add("addu");
                 newInstruction.add(register);
-                newInstruction.add(register2);
                 newInstruction.add("$zero");
+                newInstruction.add(register2);
                 this.converter.new_instruction(newInstruction);
                 answer = this.converter.instruction_to_hex();
                 break;
@@ -175,7 +189,7 @@ public class TextConverter {
                newInstruction.set(0, "bne");
                newInstruction.set(1, "$at");
                newInstruction.set(2, "$zero");
-               newInstruction.add(Integer.toString(value));
+               newInstruction.set(3, Integer.toString(value));
                this.converter.new_instruction(newInstruction);
                answer += this.converter.instruction_to_hex();
                break;
