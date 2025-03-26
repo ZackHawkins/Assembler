@@ -63,7 +63,24 @@ public class InstructionConverter {
 
     public ArrayList<String> get_instruction_array(){return this.instructionArray;}
 
-    public int convert_register_to_value(String register){return get_register_value(register);}
+    /**
+     * returns the decimal value of a hexadecimal as a String
+     * @param hex String
+     * @return hexadecimal converted into decimal notation and returned as a String
+     */
+    public String hex_to_decimal(String hex) {
+        return String.valueOf(Integer.parseInt(hex, 16));
+    }
+
+    /**
+     * decimal_to_hex is a method that take sin an integer and returns the hexadecimal notation in
+     * base 16 format
+     * @param decimal int
+     * @return a string of the hexadecimal notation from the passed in integer
+     */
+    public String decimal_to_hex(int decimal) {
+        return Integer.toHexString(decimal);
+    }
 
 //------------------------------------------------------ Environment Setup ------------------------------------------------------//
 
@@ -157,25 +174,6 @@ public class InstructionConverter {
     }
 
 //------------------------------------------------------ Converters ------------------------------------------------------//
-
-    /**
-     * returns the decimal value of a hexadecimal as a String
-     * @param hex String
-     * @return hexadecimal converted into decimal notation and returned as a String
-     */
-    private String hex_to_decimal(String hex) {
-        return String.valueOf(Integer.parseInt(hex, 16));
-    }
-
-    /**
-     * decimal_to_hex is a method that take sin an integer and returns the hexadecimal notation in
-     * base 16 format
-     * @param decimal int
-     * @return a string of the hexadecimal notation from the passed in integer
-     */
-    private String decimal_to_hex(int decimal) {
-        return Integer.toHexString(decimal);
-    }
 
      /**
      * helper method to for format_i_type_converter, this method will return a specific string
