@@ -108,17 +108,16 @@ public class TextConverter {
         }
     }
 
-    private int calculate_offset(String x){
-        int value = 0;
-        if(x.startsWith("$")){
-            InstructionConverter converter = new InstructionConverter();
-            value = converter.convert_register_to_value(x);
-        } else if (this.labels.containsKey(x)){
-            value = this.labels.get(x);
-        } else {
-            value = Integer.parseInt(x);
-        }
-        return (value - (this.currentAddress + 4)) / 4;
+    /**
+     * calculate_offset is a method used for determining the offset of labels used in branch instructions
+     * @param label current label being used in instruction
+     * @param instruction op
+     * @return integer of the offset from current instruction to the label that is being jumped to
+     */
+    private int calculate_offset(String label, String instruction){
+        int offset = 4;
+        if(instruction.equals("blt")) offset = 8;
+        return (this.labels.get(label) - (this.currentAddress + offset)) / 4;
     }
 
     /**
@@ -140,9 +139,9 @@ public class TextConverter {
             case "move" -> register2 = instructionArray.get(2);
             case "la" -> value = this.data.get(instructionArray.get(2));
             case "li" -> value = Integer.parseInt(instructionArray.get(2));
-            case "blt","bne","beq" -> {
+            case "bne","beq", "blt" -> {
                 register2 = instructionArray.get(2);
-                value = calculate_offset(instructionArray.get(3));
+                value = calculate_offset(instructionArray.get(3), inst);
             }
             case "j" -> value = this.labels.get(instructionArray.get(1)) >> 2;
         }
@@ -172,7 +171,7 @@ public class TextConverter {
                 }
                 break;
             case "move":
-                newInstruction.add("add");
+                newInstruction.add("addu");
                 newInstruction.add(register);
                 newInstruction.add("$zero");
                 newInstruction.add(register2);

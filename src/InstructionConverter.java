@@ -94,6 +94,7 @@ public class InstructionConverter {
      */
     private void load_mnemonic() {
         mnemonic.put("add", 0);
+        mnemonic.put("addu", 0);
         mnemonic.put("addiu", 9);
         mnemonic.put("and", 0);
         mnemonic.put("andi", 12);
@@ -117,6 +118,7 @@ public class InstructionConverter {
      */
     private void load_function() {
         function.put("add", 32);
+        function.put("addu", 33);
         function.put("and", 36);
         function.put("or", 37);
         function.put("slt", 42);
